@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://localhost/schema/framework"
+           xmlns="http://localhost/schema/framework" elementFormDefault="qualified">
+
+    <xsd:annotation>
+        <xsd:documentation xml:lang="en">
+            Interfaces and SQLs mapping define.
+            Copyright 2021 Example.com. All rights reserved.
+        </xsd:documentation>
+    </xsd:annotation>
+
+    <xsd:group name="statementGroup">
+        <xsd:choice>
+            <xsd:element name="sql" minOccurs="0" maxOccurs="unbounded" type="SQL"/>
+        </xsd:choice>
+    </xsd:group>
+
+    <xsd:element name="namespace">
+        <xsd:annotation>
+            <xsd:documentation>
+                Root Element.
+                Copyright 2021 Example.com. All rights reserved.
+            </xsd:documentation>
+        </xsd:annotation>
+        <xsd:complexType>
+            <xsd:choice maxOccurs="unbounded">
+                <xsd:group ref="statementGroup" minOccurs="0" maxOccurs="1"/>
+                <xsd:any namespace="##other" minOccurs="0" maxOccurs="1">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            <![CDATA[ Other NameSpace's Any Element ]]>
+                        </xsd:documentation>
+                    </xsd:annotation>
+                </xsd:any>
+            </xsd:choice>
+            <xsd:attribute name="mapper" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="SQL">
+        <xsd:simpleContent>
+            <xsd:extension base="xsd:string">
+                <xsd:attribute name="id" type="xsd:string" use="required"/>
+            </xsd:extension>
+        </xsd:simpleContent>
+    </xsd:complexType>
+
+</xsd:schema>

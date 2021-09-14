@@ -1,0 +1,7 @@
+http\://localhost/schema/framework=META-INF/framework.xsd
+http\://localhost/schema/framework/framework.xsd=META-INF/framework.xsd
+http\://localhost/schema/framework/framework-1.0.xsd=META-INF/framework.xsd
+http\://localhost/schema/framework/framework-1.1.xsd=META-INF/framework.xsd
+http\://localhost/schema/framework/framework-1.2.xsd=META-INF/framework.xsd
+http\://localhost/schema/framework/framework-2.0.xsd=META-INF/framework.xsd
+http\://localhost/schema/framework/framework-2.1.xsd=META-INF/framework.xsd
