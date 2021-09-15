@@ -46,3 +46,11 @@ _**5. class file**_
         public static final String selectById = "com.springboot.provider.mjt.constants.Mapper.selectById";
 
     }
+
+_**6. usage**_
+
+    JdbcOperations jdbcTemplate = com.springboot.mjt.proxy.JdbcOperationsProxy.getProxyInstance(${dsName});
+    
+    RowMapper<Role> rowMapper = new BeanPropertyRowMapper<>(Role.class);
+    
+    List<Role> roles = jdbcTemplate.query(Mapper.selectById, rowMapper, 1, "超级管理员");

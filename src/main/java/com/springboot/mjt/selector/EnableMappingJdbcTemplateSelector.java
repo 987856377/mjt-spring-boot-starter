@@ -3,10 +3,7 @@ package com.springboot.mjt.selector;
 import com.springboot.mjt.annotation.EnableMappingJdbcTemplate;
 import com.springboot.mjt.config.MappingJdbcTemplateConfig;
 import com.springboot.mjt.factory.MappingJdbcTemplateFactory;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
+import com.springboot.mjt.task.XMLResourceRecursiveTask;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.io.Resource;
@@ -17,10 +14,11 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
 import java.util.stream.Stream;
 
 /**
@@ -52,6 +50,7 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
     @Override
     public String[] selectImports(AnnotationMetadata importingClassMetadata) {
         Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(EnableMappingJdbcTemplate.class.getName());
+
         assert annotationAttributes != null;
         Object[] baseLocations = (Object[]) annotationAttributes.get(BASE_LOCATIONS);
         if (baseLocations != null && baseLocations.length > 0) {
@@ -60,20 +59,16 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
 
         Resource[] resources = resolveMapperLocations();
 
-        Arrays.stream(resources).forEach(resource -> {
-            SAXReader reader = new SAXReader();
-            try {
-                Document document = reader.read(resource.getInputStream());
-                Element namespace = document.getRootElement();
-                String mapper = namespace.attributeValue("mapper");
-                List<Element> sqls = namespace.elements("sql");
+        ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() / 2 + 1);
 
-                sqls.forEach(sql -> MappingJdbcTemplateFactory.put(mapper + "." + sql.attributeValue("id"), sql.getTextTrim()));
-
-            } catch (DocumentException | IOException e) {
-                e.printStackTrace();
-            }
-        });
+        ForkJoinTask<Map<String, String>> xmlMappingMap = pool.submit(new XMLResourceRecursiveTask(resources));
+        try {
+            MappingJdbcTemplateFactory.putAll(xmlMappingMap.get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            pool.shutdown();
+        }
 
         return new String[]{MAPPING_JDBC_TEMPLATE_CONFIG};
     }

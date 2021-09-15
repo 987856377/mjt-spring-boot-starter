@@ -2,6 +2,7 @@ package com.springboot.mjt.factory;
 
 import org.springframework.util.Assert;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Date 2021/9/13 16:44
  */
 public class MappingJdbcTemplateFactory {
-    private static final ConcurrentHashMap<String, String> MAP = new ConcurrentHashMap<>();
+    private static final Map<String, String> MAP = new ConcurrentHashMap<>();
 
     public static void put(String mapperDotId, String sql) {
         Assert.notNull(mapperDotId, "Mapper.Id must not be null");
@@ -24,5 +25,10 @@ public class MappingJdbcTemplateFactory {
         String sql = MAP.get(mapperDotId);
         Assert.notNull(sql, "SQL must not be null");
         return sql;
+    }
+
+    public static void putAll(Map<String, String> map) {
+        Assert.notNull(map, "Map must not be null");
+        MAP.putAll(map);
     }
 }
