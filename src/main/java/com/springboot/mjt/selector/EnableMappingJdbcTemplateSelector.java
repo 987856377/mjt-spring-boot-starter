@@ -51,13 +51,9 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
     public String[] selectImports(AnnotationMetadata importingClassMetadata) {
         Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(EnableMappingJdbcTemplate.class.getName());
 
-        assert annotationAttributes != null;
-        Object[] baseLocations = (Object[]) annotationAttributes.get(BASE_LOCATIONS);
-        if (baseLocations != null && baseLocations.length > 0) {
-            this.mapperLocations = (String[]) baseLocations;
-        }
+        Object[] baseLocations = (Object[]) Optional.ofNullable(annotationAttributes).map(map -> map.get(BASE_LOCATIONS)).orElseGet(() -> new Object[]{});
 
-        Resource[] resources = resolveMapperLocations();
+        Resource[] resources = resolveMapperLocations((String[]) baseLocations);
 
         ForkJoinPool pool = new ForkJoinPool(Runtime.getRuntime().availableProcessors() / 2 + 1);
 
@@ -73,8 +69,8 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
         return new String[]{MAPPING_JDBC_TEMPLATE_CONFIG};
     }
 
-    public Resource[] resolveMapperLocations() {
-        return Stream.of(Optional.ofNullable(this.mapperLocations).orElse(new String[0]))
+    public Resource[] resolveMapperLocations(String[] baseLocations) {
+        return Stream.of(Optional.ofNullable(baseLocations).orElse(this.mapperLocations))
                 .flatMap(location -> Stream.of(getResources(location))).toArray(Resource[]::new);
     }
 
