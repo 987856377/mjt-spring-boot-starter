@@ -1,12 +1,9 @@
 package com.springboot.mjt.task;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
+import com.springboot.mjt.loader.ResourceLoader;
 import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.springframework.core.io.Resource;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinTask;
@@ -59,19 +56,11 @@ public class XMLResourceRecursiveTask extends RecursiveTask<Map<String, String>>
         Map<String, String> map = new ConcurrentHashMap<>();
 
         Arrays.stream(resources).forEach(resource -> {
-            SAXReader reader = new SAXReader();
-            try {
-                Document document = reader.read(resource.getInputStream());
-                Element namespace = document.getRootElement();
-
-                String mapper = namespace.attributeValue("mapper");
-                List<Element> sqlList = namespace.elements("sql");
-
+            Optional.ofNullable(ResourceLoader.load(resource)).ifPresent(elementMapping -> {
+                String mapper = elementMapping.getMapper();
+                List<Element> sqlList = elementMapping.getSqlList();
                 sqlList.forEach(sql -> map.put(mapper + "." + sql.attributeValue("id"), sql.getTextTrim()));
-
-            } catch (DocumentException | IOException e) {
-                e.printStackTrace();
-            }
+            });
         });
         return map;
     }
