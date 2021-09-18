@@ -3,6 +3,7 @@ package com.springboot.mjt.factory;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DataSourceFactory {
 
-    private static final ConcurrentHashMap<String, DataSource> DATA_SOURCE_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, DataSource> DATA_SOURCE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 根据数据源名称获取数据源

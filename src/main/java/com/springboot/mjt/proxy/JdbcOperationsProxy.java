@@ -49,36 +49,46 @@ public class JdbcOperationsProxy {
         Assert.notNull(jdbcTemplate, "JdbcTemplate must not be null");
 
         return (JdbcOperations) Proxy.newProxyInstance(JdbcOperations.class.getClassLoader(), new Class<?>[]{JdbcOperations.class}, (proxy, method, args) -> {
-            AtomicReference<String> sql = new AtomicReference<>("");
+            // exchange sql
+            exchange(args);
 
             // convert sql
-            if (args[0] instanceof String) {
-                args[0] = MappingJdbcTemplateFactory.get((String) args[0]);
-            }
-
-            // implant the args to sql
-            Arrays.stream(args).forEach(item -> {
-                if (item instanceof String) {
-                    sql.set((String) item);
-                } else if (item instanceof Object[]) {
-                    Arrays.stream(((Object[]) item)).forEach(param -> {
-                        sql.updateAndGet(s -> s.replaceFirst("\\?", "'" + Matcher.quoteReplacement(param.toString()) + "'"));
-                    });
-                }
-            });
+            String sql = format(args);
 
             Object result = null;
             try {
                 long l = System.currentTimeMillis();
                 result = method.invoke(jdbcTemplate, args);
 
-                logger.info("\nJdbcOperations Method: {} \nSQL: {} \nInvoke Cost: {}",
-                        method.getName(), sql.accumulateAndGet(";", (s, s2) -> s + s2), (System.currentTimeMillis() - l) + "ms");
-            } catch (Exception  e) {
-                logger.error("\nSQL: {} \nError Message: {}", sql.accumulateAndGet(";", (s, s2) -> s + s2), e.getCause().toString());
+                logger.info("\nJdbcOperations Method: {} \nSQL: {} \nInvoke Cost: {}", method.getName(), sql, (System.currentTimeMillis() - l) + "ms");
+            } catch (Exception e) {
+                logger.error("\nSQL: {} \nError Message: {}", sql, e.getCause().toString());
             }
 
             return result;
         });
+    }
+
+    public static void exchange(Object[] args) {
+        if (args[0] instanceof String) {
+            args[0] = MappingJdbcTemplateFactory.get((String) args[0]);
+        }
+    }
+
+    private static String format(Object[] args) {
+        AtomicReference<String> sql = new AtomicReference<>("");
+
+        // implant the args to sql
+        Arrays.stream(args).forEach(item -> {
+            if (item instanceof String) {
+                sql.set((String) item);
+            } else if (item instanceof Object[]) {
+                Arrays.stream(((Object[]) item)).forEach(param -> {
+                    sql.updateAndGet(s -> s.replaceFirst("\\?", "'" + Matcher.quoteReplacement(param.toString()) + "'"));
+                });
+            }
+        });
+
+        return sql.accumulateAndGet(";", (s, s2) -> s + s2);
     }
 }
