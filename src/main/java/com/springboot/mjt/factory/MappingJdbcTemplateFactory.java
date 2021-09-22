@@ -7,8 +7,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description
- * @Project springboot-provider
- * @Package com.springboot.provider.mjt.selector.factory
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.factory
  * @Author xuzhenkui
  * @Date 2021/9/13 16:44
  */

@@ -23,8 +23,8 @@ import java.util.stream.Stream;
 
 /**
  * @Description 使用 @{@link EnableMappingJdbcTemplate} 注解, 自动启用 @{@link MappingJdbcTemplateConfig} 并将其中的配置注册到spring context中
- * @Project springboot-provider
- * @Package com.springboot.provider.common.selector
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.selector
  * @Author xuzhenkui
  * @Date 2021/9/13 15:24
  */

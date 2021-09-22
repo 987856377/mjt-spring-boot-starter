@@ -17,8 +17,8 @@ import java.util.regex.Matcher;
 
 /**
  * @Description
- * @Project springboot-provider
- * @Package com.springboot.provider.mjt.proxy
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.proxy
  * @Author xuzhenkui
  * @Date 2021/9/14 12:51
  */

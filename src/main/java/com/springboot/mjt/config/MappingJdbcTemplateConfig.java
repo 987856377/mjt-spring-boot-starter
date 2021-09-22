@@ -13,8 +13,8 @@ import java.util.Arrays;
 
 /**
  * @Description 使用 @{@link EnableMappingJdbcTemplate} 注解, 自动启用 @{@link MappingJdbcTemplateConfig} 并将其中的配置注册到spring context中
- * @Project springboot-provider
- * @Package com.springboot.provider.common.selector.config
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.config
  * @Author xuzhenkui
  * @Date 2021/9/13 15:26
  */
@@ -30,7 +30,7 @@ public class MappingJdbcTemplateConfig {
 
     public void initDataSourceFactory() {
         String[] beanNamesForType = this.applicationContext.getBeanNamesForType(DataSource.class);
-        logger.info("beanNamesForType: " + Arrays.toString(beanNamesForType));
+        logger.info(">>> MJT load from Spring ApplicationContext: " + Arrays.toString(beanNamesForType));
 
         for (String beanName : beanNamesForType) {
             Object bean = this.applicationContext.getBean(beanName);

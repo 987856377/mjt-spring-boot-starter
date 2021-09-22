@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description 多数据源控制器
- * @Project development
- * @Package com.spring.development.datasource
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.factory
  * @Author xuzhenkui
  * @Date 2020/2/26 18:27
  */

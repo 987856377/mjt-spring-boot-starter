@@ -7,8 +7,8 @@ import java.lang.annotation.*;
 
 /**
  * @Description
- * @Project springboot-provider
- * @Package com.springboot.provider.common.annotation
+ * @Project mjt-spring-boot-starter
+ * @Package com.springboot.mjt.annotation
  * @Author xuzhenkui
  * @Date 2021/9/13 15:22
  */
