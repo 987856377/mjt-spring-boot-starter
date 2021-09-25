@@ -59,7 +59,7 @@ public class XMLResourceRecursiveTask extends RecursiveTask<Map<String, String>>
             Optional.ofNullable(ResourceLoader.load(resource)).ifPresent(elementMapping -> {
                 String mapper = elementMapping.getMapper();
                 List<Element> sqlList = elementMapping.getSqlList();
-                sqlList.forEach(sql -> map.put(mapper + "." + sql.attributeValue("id"), sql.getTextTrim()));
+                sqlList.forEach(sql -> map.putIfAbsent(mapper + "." + sql.attributeValue("id"), sql.getTextTrim()));
             });
         });
         return map;
