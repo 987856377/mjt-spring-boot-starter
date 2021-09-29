@@ -35,6 +35,10 @@
             </xsd:choice>
             <xsd:attribute name="mapper" type="xsd:string" use="required"/>
         </xsd:complexType>
+        <xsd:unique name="uniqueId">
+            <xsd:selector xpath="*"/>
+            <xsd:field xpath="@id"/>
+        </xsd:unique>
     </xsd:element>
 
     <xsd:complexType name="SQL">
