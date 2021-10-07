@@ -36,7 +36,7 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
 
     private String[] mapperLocations = new String[]{"classpath*:/mapper/**/*.xml", "classpath*:/xml/**/*.xml", "classpath*:/mjt/**/*.xml"};
 
-    private static final ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
+    private static final ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
     private static final MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory();
 
@@ -76,7 +76,7 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
 
     private Resource[] getResources(String location) {
         try {
-            return resourceResolver.getResources(location);
+            return resourcePatternResolver.getResources(location);
         } catch (IOException e) {
             return new Resource[0];
         }
