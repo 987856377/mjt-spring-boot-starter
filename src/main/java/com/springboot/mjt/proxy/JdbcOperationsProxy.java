@@ -68,11 +68,11 @@ public class JdbcOperationsProxy {
         return (JdbcOperations) Proxy.newProxyInstance(JdbcOperations.class.getClassLoader(), new Class<?>[]{JdbcOperations.class}, (proxy, method, args) -> {
             // exchange sql
             if (exchange) {
-                exchange(args);
+                preparedStatementSetter(args);
             }
 
             // convert sql
-            String sql = format(args, format);
+            String sql = preparedStatementFormatter(args, format);
 
             Object result = null;
             try {
@@ -88,7 +88,7 @@ public class JdbcOperationsProxy {
         });
     }
 
-    private static void exchange(Object[] args) {
+    private static void preparedStatementSetter(Object[] args) {
         if (args[0] instanceof String) {
             String sql = MappingJdbcTemplateFactory.get((String) args[0]);
             if (StringUtils.hasText(sql)) {
@@ -97,7 +97,7 @@ public class JdbcOperationsProxy {
         }
     }
 
-    private static String format(Object[] args, Boolean format) {
+    private static String preparedStatementFormatter(Object[] args, Boolean format) {
         if (!format && args[0] instanceof String) {
             return (String) args[0];
         }
