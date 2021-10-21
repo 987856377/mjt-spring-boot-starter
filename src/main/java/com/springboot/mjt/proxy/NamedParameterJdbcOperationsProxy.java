@@ -139,10 +139,8 @@ public class NamedParameterJdbcOperationsProxy {
     private static void sqlParameterSetter(AtomicReference<String> sql, String key, Object data) {
         String source = StringUtils.leftPad(key, key.length() + 1, ':');
         if (sql.get().contains(source)) {
-            String value = String.valueOf(data);
-            if (StringUtils.isNotEmpty(value)) {
-                sql.updateAndGet(s -> s.replaceAll(source, Matcher.quoteReplacement(StringUtils.center(value, value.length() + 2, "'"))));
-            }
+            String value = Matcher.quoteReplacement(String.valueOf(data));
+            sql.updateAndGet(s -> s.replaceAll(source, StringUtils.center(value, value.length() + 2, "'")));
         }
     }
 

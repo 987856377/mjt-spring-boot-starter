@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
@@ -91,7 +91,7 @@ public class JdbcOperationsProxy {
     private static void preparedStatementSetter(Object[] args) {
         if (args[0] instanceof String) {
             String sql = MappingJdbcTemplateFactory.get((String) args[0]);
-            if (StringUtils.hasText(sql)) {
+            if (StringUtils.isNotBlank(sql)) {
                 args[0] = sql;
             }
         }
@@ -109,8 +109,9 @@ public class JdbcOperationsProxy {
             if (item instanceof String) {
                 sql.set((String) item);
             } else if (item instanceof Object[]) {
-                Arrays.stream(((Object[]) item)).forEach(param -> {
-                    sql.updateAndGet(s -> s.replaceFirst("\\?", "'" + Matcher.quoteReplacement(param.toString()) + "'"));
+                Arrays.stream(((Object[]) item)).forEach(data -> {
+                    String value = Matcher.quoteReplacement(String.valueOf(data));
+                    sql.updateAndGet(s -> s.replaceFirst("\\?", StringUtils.center(value, value.length() + 2, "'")));
                 });
             } else if (item instanceof PreparedStatementCreator && item instanceof PreparedStatementSetter
                     && item instanceof SqlProvider && item instanceof ParameterDisposer) {
