@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 public class EnableMappingJdbcTemplateSelector implements ImportSelector {
 
     private static final String MAPPING_JDBC_TEMPLATE_CONFIG = "com.springboot.mjt.config.MappingJdbcTemplateConfig";
+    private static final String DATASOURCE_SHUTDOWN_HOOK = "com.springboot.mjt.hook.DataSourceShutdownHook";
 
     private static final String BASE_LOCATIONS = "baseLocations";
 
@@ -66,7 +67,7 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
             pool.shutdown();
         }
 
-        return new String[]{MAPPING_JDBC_TEMPLATE_CONFIG};
+        return new String[]{MAPPING_JDBC_TEMPLATE_CONFIG, DATASOURCE_SHUTDOWN_HOOK};
     }
 
     public Resource[] resolveMapperLocations(String[] baseLocations) {
