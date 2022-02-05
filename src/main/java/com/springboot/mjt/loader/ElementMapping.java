@@ -16,6 +16,14 @@ public class ElementMapping {
 
     private List<Element> sqlList;
 
+    public ElementMapping() {
+    }
+
+    public ElementMapping(String mapper, List<Element> sqlList) {
+        this.mapper = mapper;
+        this.sqlList = sqlList;
+    }
+
     public String getMapper() {
         return mapper;
     }

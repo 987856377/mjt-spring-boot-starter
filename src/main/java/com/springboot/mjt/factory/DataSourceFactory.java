@@ -46,7 +46,7 @@ public class DataSourceFactory {
     /**
      * 删除数据源
      *
-     * @param dsName     数据源名称
+     * @param dsName 数据源名称
      */
     public static Boolean removeDataSource(String dsName) {
         if (StringUtils.hasText(dsName)) {

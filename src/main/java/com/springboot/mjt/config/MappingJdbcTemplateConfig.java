@@ -33,7 +33,7 @@ public class MappingJdbcTemplateConfig {
         for (String beanName : beanNamesForType) {
             Object bean = this.applicationContext.getBean(beanName);
 
-            DataSourceFactory.addDataSource(beanName, (DataSource)bean);
+            DataSourceFactory.addDataSource(beanName, (DataSource) bean);
         }
     }
 
