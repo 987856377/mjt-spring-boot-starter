@@ -38,7 +38,7 @@ public class JdbcOperationsProxy {
         if (JDBC_OPERATIONS_MAP.get(dsName) == null) {
             DataSource dataSource = DataSourceFactory.getDataSource(dsName);
             Assert.notNull(dataSource, dsName + " datasource is not exists in DataSourceFactory, " +
-                    "or you can use { JdbcOperations getProxyInstance(DataSource dataSource, Boolean exchange) } after build DataSource by yourself!");
+                    "or you can use { JdbcOperations getProxyInstance(DataSource dataSource, ...) } after build DataSource by yourself!");
 
             JDBC_OPERATIONS_MAP.putIfAbsent(dsName, getProxyInstance(dataSource, exchange, format));
         }
