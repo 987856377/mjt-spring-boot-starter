@@ -46,9 +46,16 @@ public class DataSourceShutdownHook {
                         try {
                             Method closeMethod = clazz.getDeclaredMethod("close");
                             closeMethod.invoke(dataSource);
-                            logger.info("{} Shutdown completed.", dataSource);
+                            logger.info("{} close completed.", dataSource);
                         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                            logger.info("{} Shutdown failed", dataSource);
+                            logger.info("{} close failed", dataSource);
+                            try {
+                                Method closeMethod = clazz.getDeclaredMethod("destroy");
+                                closeMethod.invoke(dataSource);
+                                logger.info("{} destroy completed.", dataSource);
+                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException invocationTargetException) {
+                                logger.info("{} destroy  failed", dataSource);
+                            }
                         }
                     });
                 }
