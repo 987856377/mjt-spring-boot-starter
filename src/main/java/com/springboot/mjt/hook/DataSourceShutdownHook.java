@@ -1,13 +1,16 @@
 package com.springboot.mjt.hook;
 
+import com.springboot.mjt.factory.DataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.util.ReflectionUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -28,38 +31,56 @@ public class DataSourceShutdownHook {
     }
 
     public void closeDataSources() {
-        String[] beanNamesForType = this.applicationContext.getBeanNamesForType(DataSource.class);
+        final String[] beanNamesForType = this.applicationContext.getBeanNamesForType(DataSource.class);
 
-        List<DataSource> dataSources = new ArrayList<>();
+        final List<DataSource> dataSources = new ArrayList<>();
         for (String beanName : beanNamesForType) {
             Object bean = this.applicationContext.getBean(beanName);
             dataSources.add((DataSource) bean);
         }
 
         if (dataSources.size() > 0) {
-            Runtime.getRuntime().addShutdownHook(new Thread("DataSource shutdown-hook") {
+            Runtime.getRuntime().addShutdownHook(new Thread("MJT-shutdown-hook") {
                 @Override
                 public void run() {
-                    dataSources.forEach(dataSource -> {
-                        logger.info("{} Shutdown initiated...", dataSource);
-                        Class<? extends DataSource> clazz = dataSource.getClass();
-                        try {
-                            Method closeMethod = clazz.getDeclaredMethod("close");
-                            closeMethod.invoke(dataSource);
-                            logger.info("{} close completed.", dataSource);
-                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                            logger.info("{} close failed", dataSource);
-                            try {
-                                Method closeMethod = clazz.getDeclaredMethod("destroy");
-                                closeMethod.invoke(dataSource);
-                                logger.info("{} destroy completed.", dataSource);
-                            } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException invocationTargetException) {
-                                logger.info("{} destroy  failed", dataSource);
-                            }
-                        }
-                    });
+                    closeApplicationContextDataSources(dataSources);
+                    closeDataSourceFactoryDataSources();
                 }
             });
         }
+    }
+
+    public void closeApplicationContextDataSources(List<DataSource> dataSources) {
+        logger.info(">>> MJT start closing ApplicationContext datasource ....");
+
+        for (DataSource dataSource : dataSources) {
+            try {
+                Method closeMethod = ReflectionUtils.findMethod(dataSource.getClass(), "close");
+                if (closeMethod != null) {
+                    closeMethod.invoke(dataSource);
+                    logger.info("DataSourceShutdownHook close datasource named [{}] success", dataSource);
+                } else {
+                    closeMethod = ReflectionUtils.findMethod(dataSource.getClass(), "destroy");
+                    if (closeMethod != null) {
+                        closeMethod.invoke(dataSource);
+                        logger.info("DataSourceShutdownHook destroy datasource named [{}] success", dataSource);
+                    } else {
+                        logger.warn("DataSourceShutdownHook close or destroy datasource named [{}] failed", dataSource);
+                    }
+                }
+            } catch (Exception e) {
+                logger.warn("DataSourceShutdownHook closeDataSource named [{}] failed", dataSource, e);
+            }
+        }
+
+        logger.info(">>> MJT close ApplicationContext datasource success");
+    }
+
+    public void closeDataSourceFactoryDataSources() {
+        logger.info(">>> MJT start closing DataSourceFactory datasource ....");
+
+        DataSourceFactory.destroy();
+
+        logger.info(">>> MJT close DataSourceFactory datasource success");
     }
 }

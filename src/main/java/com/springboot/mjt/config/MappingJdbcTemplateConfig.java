@@ -27,14 +27,16 @@ public class MappingJdbcTemplateConfig {
     }
 
     public void initDataSourceFactory() {
-        String[] beanNamesForType = this.applicationContext.getBeanNamesForType(DataSource.class);
-        logger.info(">>> MJT load from Spring ApplicationContext: " + Arrays.toString(beanNamesForType));
+        final String[] beanNamesForType = this.applicationContext.getBeanNamesForType(DataSource.class);
+        logger.info(">>> MJT load from ApplicationContext: " + Arrays.toString(beanNamesForType));
 
         for (String beanName : beanNamesForType) {
             Object bean = this.applicationContext.getBean(beanName);
 
             DataSourceFactory.addDataSource(beanName, (DataSource) bean);
         }
+
+        logger.info(">>> MJT add datasource {} to ApplicationContext success", Arrays.asList(beanNamesForType));
     }
 
 }
