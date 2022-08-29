@@ -8,7 +8,8 @@ Feat:
 支持@Transactional多数据源事务；
 支持程序关闭数据源自动销毁。
 
-_** dependency **_
+_**dependency**_
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jta-atomikos</artifactId>
