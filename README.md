@@ -1,4 +1,13 @@
 ### A framework for JdbcTemplate mapping xml sqls.
+dependency atomikos
+基于spring JdbcTemplate进行封装，实现 JdbcTemplate所需的sql语句分离。
+
+Feat: 
+执行 sql 日志输出，耗时等；
+自动获取 ApplicationContext 中的 DataSource bean, 注册到本框架数据源工厂中；
+自动加载 xml 文件中的 sql；
+支持@Transactional多数据源事务；
+支持程序关闭数据源自动销毁。
 
 _**1. clone repo**_
 
