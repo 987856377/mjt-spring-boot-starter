@@ -34,6 +34,11 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
     private static final String DATASOURCE_SHUTDOWN_HOOK = "com.springboot.mjt.hook.DataSourceShutdownHook";
 
     private static final String BASE_LOCATIONS = "baseLocations";
+    private static final String EXCHANGE = "exchange";
+    private static final String FORMAT = "format";
+
+    public static boolean ENABLE_EXCHANGE = true;
+    public static boolean ENABLE_FORMAT = true;
 
     private String[] mapperLocations = new String[]{"classpath*:/mapper/**/*.xml", "classpath*:/xml/**/*.xml", "classpath*:/mjt/**/*.xml"};
 
@@ -53,6 +58,8 @@ public class EnableMappingJdbcTemplateSelector implements ImportSelector {
         Map<String, Object> annotationAttributes = importingClassMetadata.getAnnotationAttributes(EnableMappingJdbcTemplate.class.getName());
 
         Object[] baseLocations = (Object[]) Optional.ofNullable(annotationAttributes).map(map -> map.get(BASE_LOCATIONS)).orElseGet(() -> new Object[]{});
+        ENABLE_EXCHANGE = (Boolean) Optional.ofNullable(annotationAttributes).map(map -> map.get(EXCHANGE)).orElse(true);
+        ENABLE_FORMAT = (Boolean) Optional.ofNullable(annotationAttributes).map(map -> map.get(FORMAT)).orElse(true);
 
         Resource[] resources = resolveMapperLocations((String[]) baseLocations);
 

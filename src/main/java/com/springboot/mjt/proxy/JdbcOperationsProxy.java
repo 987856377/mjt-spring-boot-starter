@@ -2,6 +2,7 @@ package com.springboot.mjt.proxy;
 
 import com.springboot.mjt.factory.DataSourceFactory;
 import com.springboot.mjt.factory.MappingJdbcTemplateFactory;
+import com.springboot.mjt.selector.EnableMappingJdbcTemplateSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
@@ -27,11 +28,11 @@ public class JdbcOperationsProxy {
     private static final ConcurrentHashMap<String, JdbcOperations> JDBC_OPERATIONS_MAP = new ConcurrentHashMap<>();
 
     public static JdbcOperations getProxyInstance(String dsName) {
-        return getProxyInstance(dsName, true);
+        return getProxyInstance(dsName, EnableMappingJdbcTemplateSelector.ENABLE_EXCHANGE);
     }
 
     public static JdbcOperations getProxyInstance(String dsName, Boolean exchange) {
-        return getProxyInstance(dsName, exchange, true);
+        return getProxyInstance(dsName, exchange, EnableMappingJdbcTemplateSelector.ENABLE_FORMAT);
     }
 
     public static JdbcOperations getProxyInstance(String dsName, Boolean exchange, Boolean format) {
@@ -46,11 +47,11 @@ public class JdbcOperationsProxy {
     }
 
     public static JdbcOperations getProxyInstance(DataSource dataSource) {
-        return getProxyInstance(dataSource, true, true);
+        return getProxyInstance(dataSource, EnableMappingJdbcTemplateSelector.ENABLE_EXCHANGE);
     }
 
     public static JdbcOperations getProxyInstance(DataSource dataSource, Boolean exchange) {
-        return getProxyInstance(dataSource, exchange, true);
+        return getProxyInstance(dataSource, exchange, EnableMappingJdbcTemplateSelector.ENABLE_FORMAT);
     }
 
     public static JdbcOperations getProxyInstance(DataSource dataSource, Boolean exchange, Boolean format) {

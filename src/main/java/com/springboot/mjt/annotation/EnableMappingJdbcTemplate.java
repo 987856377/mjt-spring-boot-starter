@@ -18,4 +18,6 @@ import java.lang.annotation.*;
 @Import(EnableMappingJdbcTemplateSelector.class)
 public @interface EnableMappingJdbcTemplate {
     String[] baseLocations() default {};
+    boolean exchange() default true;
+    boolean format() default true;
 }

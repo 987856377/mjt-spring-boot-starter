@@ -2,6 +2,7 @@ package com.springboot.mjt.proxy;
 
 import com.springboot.mjt.factory.DataSourceFactory;
 import com.springboot.mjt.factory.MappingJdbcTemplateFactory;
+import com.springboot.mjt.selector.EnableMappingJdbcTemplateSelector;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,26 +36,30 @@ public class NamedParameterJdbcOperationsProxy {
     private static final ConcurrentHashMap<String, NamedParameterJdbcOperations> NAMED_PARAMETER_JDBC_OPERATIONS_MAP = new ConcurrentHashMap<>();
 
     public static NamedParameterJdbcOperations getProxyInstance(String dsName) {
-        return getProxyInstance(dsName, true);
+        return getProxyInstance(dsName, EnableMappingJdbcTemplateSelector.ENABLE_EXCHANGE);
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(String dsName, Boolean exchange) {
+        return getProxyInstance(dsName, exchange, EnableMappingJdbcTemplateSelector.ENABLE_FORMAT);
+    }
+
+    public static NamedParameterJdbcOperations getProxyInstance(String dsName, Boolean exchange, Boolean format) {
         if (NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(dsName) == null) {
             DataSource dataSource = DataSourceFactory.getDataSource(dsName);
             Assert.notNull(dataSource, dsName + " datasource is not exists in DataSourceFactory, " +
                     "or you can use { NamedParameterJdbcOperations getProxyInstance(DataSource dataSource, ...) } after build DataSource by yourself!");
 
-            NAMED_PARAMETER_JDBC_OPERATIONS_MAP.putIfAbsent(dsName, getProxyInstance(dataSource, exchange));
+            NAMED_PARAMETER_JDBC_OPERATIONS_MAP.putIfAbsent(dsName, getProxyInstance(dataSource, exchange, format));
         }
         return NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(dsName);
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(DataSource dataSource) {
-        return getProxyInstance(dataSource, true);
+        return getProxyInstance(dataSource, EnableMappingJdbcTemplateSelector.ENABLE_EXCHANGE);
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(DataSource dataSource, Boolean exchange) {
-        return getProxyInstance(dataSource, exchange, true);
+        return getProxyInstance(dataSource, exchange, EnableMappingJdbcTemplateSelector.ENABLE_FORMAT);
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(DataSource dataSource, Boolean exchange, Boolean format) {
