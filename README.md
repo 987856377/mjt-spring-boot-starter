@@ -6,7 +6,7 @@ Feat:
 执行 sql 日志输出，耗时等;
 自动获取 ApplicationContext 中的 DataSource bean, 注册到本框架数据源工厂中；
 自动加载 xml 文件中的 sql；
-支持@Transactional多数据源事务；
+支持@Transactional多数据源事务(搭配jta atomikos)；
 支持程序关闭数据源自动销毁。
 ```
 
