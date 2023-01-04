@@ -3,7 +3,6 @@ package com.springboot.mjt.proxy;
 import com.springboot.mjt.factory.DataSourceFactory;
 import com.springboot.mjt.factory.MappingJdbcTemplateFactory;
 import com.springboot.mjt.selector.EnableMappingJdbcTemplateSelector;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ParameterDisposer;
@@ -14,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
@@ -44,14 +44,15 @@ public class NamedParameterJdbcOperationsProxy {
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(String dsName, Boolean exchange, Boolean format) {
-        if (NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(dsName) == null) {
+        String unionKey = dsName + ":" + exchange + ":" + format;
+        if (NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(unionKey) == null) {
             DataSource dataSource = DataSourceFactory.getDataSource(dsName);
             Assert.notNull(dataSource, dsName + " datasource is not exists in DataSourceFactory, " +
                     "or you can use { NamedParameterJdbcOperations getProxyInstance(DataSource dataSource, ...) } after build DataSource by yourself!");
 
-            NAMED_PARAMETER_JDBC_OPERATIONS_MAP.putIfAbsent(dsName, getProxyInstance(dataSource, exchange, format));
+            NAMED_PARAMETER_JDBC_OPERATIONS_MAP.putIfAbsent(unionKey, getProxyInstance(dataSource, exchange, format));
         }
-        return NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(dsName);
+        return NAMED_PARAMETER_JDBC_OPERATIONS_MAP.get(unionKey);
     }
 
     public static NamedParameterJdbcOperations getProxyInstance(DataSource dataSource) {
@@ -99,7 +100,7 @@ public class NamedParameterJdbcOperationsProxy {
     private static void preparedStatementSetter(Object[] args) {
         if (args[0] instanceof String) {
             String sql = MappingJdbcTemplateFactory.get((String) args[0]);
-            if (StringUtils.isNotBlank(sql)) {
+            if (StringUtils.hasText(sql)) {
                 args[0] = sql;
             }
         }
@@ -118,7 +119,6 @@ public class NamedParameterJdbcOperationsProxy {
                 sql.set((String) item);
             } else if (item instanceof PreparedStatementCreator && item instanceof PreparedStatementSetter
                     && item instanceof SqlProvider && item instanceof ParameterDisposer) {
-
                 sql.set(((SqlProvider) item).getSql());
             } else if (item instanceof Map) {
                 Map<String, Object> map = (Map<String, Object>) item;
@@ -143,10 +143,10 @@ public class NamedParameterJdbcOperationsProxy {
     }
 
     private static void sqlParameterSetter(AtomicReference<String> sql, String key, Object data) {
-        String source = StringUtils.leftPad(key, key.length() + 1, ':');
+        String source = ":" + key;
         if (sql.get().contains(source)) {
-            String value = Matcher.quoteReplacement(String.valueOf(data));
-            sql.updateAndGet(s -> s.replaceAll(source, StringUtils.center(value, value.length() + 2, "'")));
+            String value = data != null ? Matcher.quoteReplacement(String.valueOf(data)) : null;
+            sql.updateAndGet(s -> s.replaceAll(source, StringUtils.quote(value)));
         }
     }
 

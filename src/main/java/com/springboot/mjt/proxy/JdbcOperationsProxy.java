@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
 import org.springframework.util.Assert;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
@@ -36,14 +36,15 @@ public class JdbcOperationsProxy {
     }
 
     public static JdbcOperations getProxyInstance(String dsName, Boolean exchange, Boolean format) {
-        if (JDBC_OPERATIONS_MAP.get(dsName) == null) {
+        String unionKey = dsName + ":" + exchange + ":" + format;
+        if (JDBC_OPERATIONS_MAP.get(unionKey) == null) {
             DataSource dataSource = DataSourceFactory.getDataSource(dsName);
             Assert.notNull(dataSource, dsName + " datasource is not exists in DataSourceFactory, " +
                     "or you can use { JdbcOperations getProxyInstance(DataSource dataSource, ...) } after build DataSource by yourself!");
 
-            JDBC_OPERATIONS_MAP.putIfAbsent(dsName, getProxyInstance(dataSource, exchange, format));
+            JDBC_OPERATIONS_MAP.putIfAbsent(unionKey, getProxyInstance(dataSource, exchange, format));
         }
-        return JDBC_OPERATIONS_MAP.get(dsName);
+        return JDBC_OPERATIONS_MAP.get(unionKey);
     }
 
     public static JdbcOperations getProxyInstance(DataSource dataSource) {
@@ -92,7 +93,7 @@ public class JdbcOperationsProxy {
     private static void preparedStatementSetter(Object[] args) {
         if (args[0] instanceof String) {
             String sql = MappingJdbcTemplateFactory.get((String) args[0]);
-            if (StringUtils.isNotBlank(sql)) {
+            if (StringUtils.hasText(sql)) {
                 args[0] = sql;
             }
         }
@@ -109,15 +110,14 @@ public class JdbcOperationsProxy {
         Arrays.stream(args).forEach(item -> {
             if (item instanceof String) {
                 sql.set((String) item);
-            } else if (item instanceof Object[]) {
-                Arrays.stream(((Object[]) item)).forEach(data -> {
-                    String value = Matcher.quoteReplacement(String.valueOf(data));
-                    sql.updateAndGet(s -> s.replaceFirst("\\?", StringUtils.center(value, value.length() + 2, "'")));
-                });
             } else if (item instanceof PreparedStatementCreator && item instanceof PreparedStatementSetter
                     && item instanceof SqlProvider && item instanceof ParameterDisposer) {
-
                 sql.set(((SqlProvider) item).getSql());
+            } else if (item instanceof Object[]) {
+                Arrays.stream(((Object[]) item)).forEach(data -> {
+                    String value = data != null ? Matcher.quoteReplacement(String.valueOf(data)) : null;
+                    sql.updateAndGet(s -> s.replaceFirst("\\?", StringUtils.quote(value)));
+                });
             }
         });
 
