@@ -1,5 +1,6 @@
 package com.springboot.mjt.processor;
 
+import com.google.auto.service.AutoService;
 import com.springboot.mjt.annotation.MjtMapper;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
@@ -18,7 +19,7 @@ import java.util.Set;
 
 /**
  * @Description 在 resource 下创建 META-INF/services/javax.annotation.processing.Processor 文件
- * 填入 com.springboot.mjt.processor.MjtMapperProcessor
+ * 填入
  * @Project mjt-spring-boot-starter
  * @Package com.springboot.mjt.processor
  * @Author Xu Zhenkui
@@ -26,6 +27,7 @@ import java.util.Set;
  */
 @SupportedAnnotationTypes("com.springboot.mjt.annotation.MjtMapper")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
+@AutoService(Processor.class)
 public class MjtMapperProcessor extends AbstractProcessor {
     private JavacTrees javacTrees;
     private TreeMaker treeMaker;
