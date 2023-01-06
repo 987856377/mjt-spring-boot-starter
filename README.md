@@ -31,17 +31,13 @@ _**2. add dependency**_
         <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
-_**3. create file `META-INF/services/javax.annotation.processing.Processor`**_ to resource directory, input below:
-
-    com.springboot.mjt.processor.MjtMapperProcessor
-
-_**4. use `@EnableMappingJdbcTemplate`**_
+_**3. use `@EnableMappingJdbcTemplate`**_
 
     default scan xml package: {"classpath*:/mapper/**/*.xml", "classpath*:/xml/**/*.xml", "classpath*:/mjt/**/*.xml"}
    
     example: @EnableMappingJdbcTemplate(baseLocations = "classpath:/xml/*.xml")
 
-_**5. xml file**_
+_**4. xml file**_
     
     <?xml version="1.0" encoding="UTF-8" ?>
     <namespace xmlns="http://localhost/schema/framework"
@@ -60,7 +56,7 @@ _**5. xml file**_
     </namespace>
 
 
-_**6. class file**_
+_**5. class file**_
     
     public class Mapper {
 
@@ -68,7 +64,7 @@ _**6. class file**_
 
     }
 
-_**7. usage**_
+_**6. usage**_
 
     JdbcOperations jdbcTemplate = com.springboot.mjt.proxy.JdbcOperationsProxy.getProxyInstance(${dsName});
     
