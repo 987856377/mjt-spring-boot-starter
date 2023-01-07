@@ -56,8 +56,9 @@ _**4. xml file**_
     </namespace>
 
 
-_**5. class file**_
-    
+_**5. class file or @MjtMapperScan("com.springboot.provider.mjt.*.mapper")**_
+
+    @MjtMapper
     public class Mapper {
 
         public static String selectById;
