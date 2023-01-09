@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 public class MjtMapperProcessor extends AbstractProcessor {
     public static final String MJTMAPPER_ANNOTATION = "com.springboot.mjt.annotation.MjtMapper";
     public static final String MJTMAPPERSCAN_ANNOTATION = "com.springboot.mjt.annotation.MjtMapperScan";
-    private static Set<String> SCANNED_MAPPER_SET = new HashSet<>();
+    private static final Set<String> SCANNED_MAPPER_SET = new HashSet<>();
 
     private JavacTrees javacTrees;
     private TreeMaker treeMaker;
@@ -80,11 +80,7 @@ public class MjtMapperProcessor extends AbstractProcessor {
 
     private void processMjtMapper(RoundEnvironment roundEnv) {
         Set<? extends Element> mapperSet = roundEnv.getElementsAnnotatedWith(MjtMapper.class);
-        mapperSet.forEach(mapper -> {
-            if (!SCANNED_MAPPER_SET.contains(mapper.toString())) {
-                processMemberValue(mapper);
-            }
-        });
+        mapperSet.forEach(this::processMemberValue);
     }
 
     private void processMjtMapperScanAnnotation(RoundEnvironment roundEnv, Element mappersPkg) {
@@ -100,12 +96,7 @@ public class MjtMapperProcessor extends AbstractProcessor {
                                 Pattern compile = Pattern.compile("^" + pkg + "\\.\\w+$");
                                 roundEnv.getRootElements().stream()
                                         .filter((Predicate<Element>) element -> compile.matcher(element.toString()).find())
-                                        .forEach(mapper -> {
-                                            if (!SCANNED_MAPPER_SET.contains(mapper.toString())) {
-                                                SCANNED_MAPPER_SET.add(mapper.toString());
-                                                processMemberValue(mapper);
-                                            }
-                                        });
+                                        .forEach(mapper -> processMemberValue(mapper));
                             });
                         }
                     }
@@ -115,25 +106,29 @@ public class MjtMapperProcessor extends AbstractProcessor {
     }
 
     private void processMemberValue(Element mapper) {
-        JCTree jcTree = javacTrees.getTree(mapper);
-        jcTree.accept(new TreeTranslator() {
-            @Override
-            public void visitClassDef(JCTree.JCClassDecl jcClassDecl) {
-                jcClassDecl.defs.stream()
-                        // 过滤，只处理变量类型
-                        .filter(item -> item.getKind().equals(Tree.Kind.VARIABLE))
-                        // 类型强转
-                        .map(jcVariableDecl -> (JCTree.JCVariableDecl) jcVariableDecl).forEach(jcVariableDecl -> {
-                            String varType = jcVariableDecl.vartype.type.toString();
-                            if (!"java.lang.String".equals(varType)) {
-                                // 限定变量类型必须是String类型，否则抛异常
-                                processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Type '" + varType + "'" + " is not support.");
-                            }
-                            jcVariableDecl.init = treeMaker.Literal(mapper.toString() + "." + jcVariableDecl.name.toString());
-                        });
-            }
-        });
-        System.out.println("-----> MJT mapper '" + mapper + "' processed.");
+        if (!SCANNED_MAPPER_SET.contains(mapper.toString())) {
+            SCANNED_MAPPER_SET.add(mapper.toString());
+
+            JCTree jcTree = javacTrees.getTree(mapper);
+            jcTree.accept(new TreeTranslator() {
+                @Override
+                public void visitClassDef(JCTree.JCClassDecl jcClassDecl) {
+                    jcClassDecl.defs.stream()
+                            // 过滤，只处理变量类型
+                            .filter(item -> item.getKind().equals(Tree.Kind.VARIABLE))
+                            // 类型强转
+                            .map(jcVariableDecl -> (JCTree.JCVariableDecl) jcVariableDecl).forEach(jcVariableDecl -> {
+                                String varType = jcVariableDecl.vartype.type.toString();
+                                if (!"java.lang.String".equals(varType)) {
+                                    // 限定变量类型必须是String类型，否则抛异常
+                                    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Type '" + varType + "'" + " is not support.");
+                                }
+                                jcVariableDecl.init = treeMaker.Literal(mapper.toString() + "." + jcVariableDecl.name.toString());
+                            });
+                }
+            });
+            System.out.println("-----> MJT mapper '" + mapper + "' processed.");
+        }
     }
 
     private static List<String> getMapperPackages(JCTree.JCExpression expression) {
