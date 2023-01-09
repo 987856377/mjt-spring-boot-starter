@@ -56,7 +56,7 @@ _**4. xml file**_
     </namespace>
 
 
-_**5. class file or @MjtMapperScan("com.springboot.provider.mjt.*.mapper")**_
+_**5. class file or @MjtMapperScan("com.springboot.provider.mjt.mapper") full package name !!!**_
 
     @MjtMapper
     public class Mapper {

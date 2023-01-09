@@ -97,12 +97,14 @@ public class MjtMapperProcessor extends AbstractProcessor {
                         if (annotation.args.size() > 0) {
                             List<String> packages = getMapperPackages(annotation.args.get(0));
                             packages.forEach(pkg -> {
-                                Pattern compile = Pattern.compile(pkg);
+                                Pattern compile = Pattern.compile("^" + pkg + "\\.\\w+$");
                                 roundEnv.getRootElements().stream()
                                         .filter((Predicate<Element>) element -> compile.matcher(element.toString()).find())
                                         .forEach(mapper -> {
-                                            processMemberValue(mapper);
-                                            SCANNED_MAPPER_SET.add(mapper.toString());
+                                            if (!SCANNED_MAPPER_SET.contains(mapper.toString())) {
+                                                SCANNED_MAPPER_SET.add(mapper.toString());
+                                                processMemberValue(mapper);
+                                            }
                                         });
                             });
                         }
