@@ -17,9 +17,12 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -92,8 +95,8 @@ public class MjtMapperProcessor extends AbstractProcessor {
                 jcClassDecl.mods.annotations.forEach(annotation -> {
                     if (MJTMAPPERSCAN_ANNOTATION.equals(annotation.type.toString())) {
                         if (annotation.args.size() > 0) {
-                            String[] packages = getMapperPackages(annotation.args.get(0));
-                            for (String pkg : packages) {
+                            List<String> packages = getMapperPackages(annotation.args.get(0));
+                            packages.forEach(pkg -> {
                                 Pattern compile = Pattern.compile(pkg);
                                 roundEnv.getRootElements().stream()
                                         .filter((Predicate<Element>) element -> compile.matcher(element.toString()).find())
@@ -101,7 +104,7 @@ public class MjtMapperProcessor extends AbstractProcessor {
                                             processMemberValue(mapper);
                                             SCANNED_MAPPER_SET.add(mapper.toString());
                                         });
-                            }
+                            });
                         }
                     }
                 });
@@ -131,15 +134,11 @@ public class MjtMapperProcessor extends AbstractProcessor {
         System.out.println("-----> MJT mapper '" + mapper + "' processed.");
     }
 
-    private static String[] getMapperPackages(JCTree.JCExpression expression) {
-        String[] packages = {};
-        if (expression.toString().contains("=")) {
-            String value = expression.toString()
-                    .replaceAll(" ", "")
-                    .replaceAll("}", "")
-                    .replaceAll("\\{", "")
-                    .replaceAll("\"", "");
-            packages = value.substring(value.indexOf("=") + 1).split(",");
+    private static List<String> getMapperPackages(JCTree.JCExpression expression) {
+        Matcher matcher = Pattern.compile("\"([^\"]*)\"").matcher(expression.toString());
+        List<String> packages = new ArrayList<>();
+        while (matcher.find()) {
+            packages.add(matcher.group(1));
         }
         return packages;
     }

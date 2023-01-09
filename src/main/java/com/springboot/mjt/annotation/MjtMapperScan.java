@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @Description
+ * @Description Regular Expression match
  * @Project mjt-spring-boot-starter
  * @Package com.springboot.mjt.annotation
  * @Author Xu Zhenkui
