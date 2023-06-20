@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -145,8 +146,14 @@ public class NamedParameterJdbcOperationsProxy {
     private static void sqlParameterSetter(AtomicReference<String> sql, String key, Object data) {
         String source = ":" + key;
         if (sql.get().contains(source)) {
-            String value = data != null ? Matcher.quoteReplacement(String.valueOf(data)) : null;
-            sql.updateAndGet(s -> s.replaceAll(source, StringUtils.quote(value)));
+            if (data instanceof String) {
+                String value = Matcher.quoteReplacement(String.valueOf(data));
+                sql.updateAndGet(s -> s.replaceAll(source, "'" + value + "'"));
+            } else if (data instanceof Collection) {
+                sql.updateAndGet(s -> s.replaceAll(source, String.valueOf(data).replaceAll("\\[", "").replaceAll("]", "")));
+            } else {
+                sql.updateAndGet(s -> s.replaceAll(source, String.valueOf(data)));
+            }
         }
     }
 

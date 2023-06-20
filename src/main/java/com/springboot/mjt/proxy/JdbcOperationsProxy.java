@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import javax.sql.DataSource;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -110,14 +111,20 @@ public class JdbcOperationsProxy {
         Arrays.stream(args).forEach(item -> {
             if (item instanceof String) {
                 sql.set((String) item);
+            } else if (item instanceof Object[]) {
+                Arrays.stream(((Object[]) item)).forEach(data -> {
+                    if (data instanceof String) {
+                        String value = Matcher.quoteReplacement(String.valueOf(data));
+                        sql.updateAndGet(s -> s.replaceFirst("\\?", "'" + value + "'"));
+                    } else if (data instanceof Collection) {
+                        sql.updateAndGet(s -> s.replaceFirst("\\?", String.valueOf(data).replaceAll("\\[", "").replaceAll("]", "")));
+                    } else {
+                        sql.updateAndGet(s -> s.replaceFirst("\\?", String.valueOf(data)));
+                    }
+                });
             } else if (item instanceof PreparedStatementCreator && item instanceof PreparedStatementSetter
                     && item instanceof SqlProvider && item instanceof ParameterDisposer) {
                 sql.set(((SqlProvider) item).getSql());
-            } else if (item instanceof Object[]) {
-                Arrays.stream(((Object[]) item)).forEach(data -> {
-                    String value = data != null ? Matcher.quoteReplacement(String.valueOf(data)) : null;
-                    sql.updateAndGet(s -> s.replaceFirst("\\?", StringUtils.quote(value)));
-                });
             }
         });
 
